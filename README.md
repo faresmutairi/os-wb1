@@ -1,4 +1,4 @@
-# Worksheet 1 — An echo of Assembler
+#Worksheet  1 — An echo of Assembler
 Student: fares almutairi 
 Module: os
 Date: 4th December 2025
@@ -25,13 +25,26 @@ range_sum.asm
 4. Run example program: `./src/task1`
 
 ## What I implemented
-- **Task 1 (20%)**: `task1.asm` — adds two global integers and prints result using `print_string` and `print_int`.
-  - Screenshot: (add screenshot)
-  - Explanation: (brief explanation of register usage, calling print_int)
-- **Task 1.2 (20%)**: `task1_2.asm` — reads two integers and prints sum.
+- **Task 1 (20%)**: This program loads two global integers, adds them together using basic register operations, and prints the result using print_int.
+  - **Example output:**
+ ``` The sum is: 42
+- **Task 1.2 (20%)**: `task1_2.asm` — This program reads two integers from the user using read_int, adds them together, and prints the result.
+- **Example output:**
+```Enter first number: 10
+Enter second number: 20
+Result = 30```
+
 - **Task 2 (20%)**:
-  - `name_repeat.asm` — prompts for name and count, validates (50 < n < 100), prints `Welcome, <name>` n times or error.
+  - `name_repeat.asm` — This program asks the user for their name and for a repeat count.
+It validates that the number is between 50 and 100.
+If the number is valid, it prints Welcome, <name> the given number of times.
+Otherwise, it prints an error message.
+Enter your name: Fares
+Enter repetition count: 55
+Welcome, Fares
+...
   - `array_sum.asm` — creates array 1..100, sums it, prints result.
+  The sum of numbers 1..100 is: 5050
   - `range_sum.asm` — asks low & high indices, validates, sums that portion and prints.
 - **Task 3 (20%)**: `Makefile` that builds all executables and a `clean` target.
 - **Task 4 (40%)**: This README and screenshots and explanations. (Add screenshots showing the program running, and describe how it works.)
@@ -52,12 +65,6 @@ make
 ./src/name_repeat
 
 
-
-## Screenshots
-- Add three screenshots:
-  1. `task1` output
-  2. `name_repeat` interaction
-  3. `array_sum` output
 
 ## References
 - PC Assembly Language (book)
