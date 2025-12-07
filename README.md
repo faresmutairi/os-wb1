@@ -1,6 +1,6 @@
 # Worksheet 1 — An echo of Assembler
-Student:
-Module: Advanced Systems Programming (UFCFWK-15-2)
+Student: fares almutairi 
+Module: os
 Date: 4th December 2025
 
 ## Repo structure
