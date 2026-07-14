@@ -1,86 +1,86 @@
-; range_sum.asm
-; Asks user for low and high indices (1..100), validates, sums arr[low..high]
 BITS 32
 global asm_main
-extern read_int
-extern print_string
-extern print_int
+%include "src/asm_io.inc"
 
 section .data
-    prompt_low db "Enter low index (1..100): ",0
-    prompt_high db "Enter high index (1..100): ",0
-    err_range db "Invalid range",10,0
-    result_msg db "Result = ",0
+    low_prompt  db "Enter low index (1..100): ", 0
+    high_prompt db "Enter high index (1..100): ", 0
+    result_text db "Range sum = ", 0
+    range_error db "Error: expected 1 <= low <= high <= 100.", 10, 0
 
 section .bss
-    arr resd 100
+    numbers resd 100
 
 section .text
 asm_main:
     push ebp
-    mov ebp, esp
+    mov  ebp, esp
+    push ebx
+    push esi
+    push edi
 
-    ; initialize arr 1..100
-    mov ecx, 0
-.init_loop:
-    cmp ecx,100
-    jge .init_done
-    mov eax, ecx
-    add eax,1
-    mov [arr + ecx*4], eax
-    inc ecx
-    jmp .init_loop
-.init_done:
+    xor  ecx, ecx
+.fill_array:
+    cmp  ecx, 100
+    jge  .read_range
+    lea  eax, [ecx + 1]
+    mov  [numbers + ecx * 4], eax
+    inc  ecx
+    jmp  .fill_array
 
-    ; prompt low
-    push prompt_low
+.read_range:
+    push dword low_prompt
     call print_string
-    add esp,4
+    add  esp, 4
     call read_int
-    mov esi, eax    ; low
+    mov  esi, eax
 
-    ; prompt high
-    push prompt_high
+    push dword high_prompt
     call print_string
-    add esp,4
+    add  esp, 4
     call read_int
-    mov edi, eax    ; high
+    mov  edi, eax
 
-    ; validate 1 <= low <= high <=100
-    cmp esi, 1
-    jl .err
-    cmp edi, esi
-    jl .err
-    cmp edi, 100
-    jg .err
+    cmp  esi, 1
+    jl   .invalid
+    cmp  edi, esi
+    jl   .invalid
+    cmp  edi, 100
+    jg   .invalid
 
-    ; sum from low to high inclusive
-    mov ecx, esi
-    xor ebx, ebx    ; sum in ebx
-.sum_loop:
-    cmp ecx, edi
-    jg .sum_done
-    mov eax, [arr + (ecx-1)*4] ; arr index ecx corresponds to value ecx
-    add ebx, eax
-    inc ecx
-    jmp .sum_loop
+    mov  ecx, esi
+    dec  ecx
+    xor  ebx, ebx
+.sum_range:
+    cmp  ecx, edi
+    jge  .show_result
+    add  ebx, [numbers + ecx * 4]
+    inc  ecx
+    jmp  .sum_range
 
-.sum_done:
-    ; print result
-    push result_msg
+.show_result:
+    push dword result_text
     call print_string
-    add esp,4
+    add  esp, 4
     push ebx
     call print_int
-    add esp,4
-    mov eax, 0
+    add  esp, 4
+    call print_nl
+    xor  eax, eax
+    jmp  .finish
+
+.invalid:
+    push dword range_error
+    call print_string
+    add  esp, 4
+    mov  eax, 1
+
+.finish:
+    pop  edi
+    pop  esi
+    pop  ebx
     leave
     ret
 
-.err:
-    push err_range
-    call print_string
-    add esp,4
-    mov eax, 1
-    leave
-    ret
+
+section .note.GNU-stack noalloc noexec nowrite progbits

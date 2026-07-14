@@ -1,95 +1,79 @@
-; name_repeat.asm
-; Reads a name (string) and a count (int). If count in (50,100) prints "Welcome <name>" count times
-; Assumes asm_io provides: read_string(buffer, maxlen), read_int, print_string, print_int
-
 BITS 32
 global asm_main
-extern read_string
-extern read_int
-extern print_string
-extern print_int
+%include "src/asm_io.inc"
 
 section .data
-    prompt_name db "Enter your name: ",0
-    prompt_count db "Enter number of times to print (must be >50 and <100): ",0
-    too_small db "Error: number too small",10,0
-    too_large db "Error: number too large",10,0
-    welcome db "Welcome, ",0
-    newline db 10,0
+    name_prompt  db "Enter your name: ", 0
+    count_prompt db "Enter repetition count (50 to 100): ", 0
+    welcome_text db "Welcome, ", 0
+    small_error  db "Error: the number must be at least 50.", 10, 0
+    large_error  db "Error: the number must be at most 100.", 10, 0
 
 section .bss
-    name_buf resb 128
+    name_buffer resb 128
 
 section .text
 asm_main:
     push ebp
-    mov ebp, esp
+    mov  ebp, esp
+    push ebx
+    push esi
 
-    ; prompt name
-    push prompt_name
+    push dword name_prompt
     call print_string
-    add esp,4
-
-    ; read_string(name_buf, 127)
-    push dword 127
-    push dword name_buf
+    add  esp, 4
+    push dword 128
+    push dword name_buffer
     call read_string
-    add esp,8
+    add  esp, 8
 
-    ; prompt count
-    push prompt_count
+    push dword count_prompt
     call print_string
-    add esp,4
-
-    ; read_int -> assume returns in eax
+    add  esp, 4
     call read_int
-    mov ebx, eax   ; count
+    mov  ebx, eax
 
-    ; check >50
-    cmp ebx, 50
-    jle .err_small
+    cmp  ebx, 50
+    jl   .too_small
+    cmp  ebx, 100
+    jg   .too_large
 
-    ; check <100
-    cmp ebx, 100
-    jge .err_large
-
-    ; loop: print "Welcome, " + name_buf ebx times
-    mov ecx, ebx   ; counter
-
+    xor  esi, esi
 .print_loop:
-    ; print welcome
-    push welcome
+    cmp  esi, ebx
+    jge  .success
+    push dword welcome_text
     call print_string
-    add esp,4
-
-    ; print name
-    push name_buf
+    add  esp, 4
+    push dword name_buffer
     call print_string
-    add esp,4
+    add  esp, 4
+    call print_nl
+    inc  esi
+    jmp  .print_loop
 
-    ; newline
-    push newline
+.success:
+    xor  eax, eax
+    jmp  .finish
+
+.too_small:
+    push dword small_error
     call print_string
-    add esp,4
+    add  esp, 4
+    mov  eax, 1
+    jmp  .finish
 
-    loop .print_loop
+.too_large:
+    push dword large_error
+    call print_string
+    add  esp, 4
+    mov  eax, 1
 
-    mov eax, 0
+.finish:
+    pop  esi
+    pop  ebx
     leave
     ret
 
-.err_small:
-    push too_small
-    call print_string
-    add esp,4
-    mov eax, 1
-    leave
-    ret
 
-.err_large:
-    push too_large
-    call print_string
-    add esp,4
-    mov eax, 1
-    leave
-    ret
+section .note.GNU-stack noalloc noexec nowrite progbits

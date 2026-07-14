@@ -1,56 +1,42 @@
-; task1_2.asm
 BITS 32
 global asm_main
-extern print_int
-extern print_string
-extern read_int
+%include "src/asm_io.inc"
 
 section .data
-    prompt1 db "Enter first integer: ",0
-    prompt2 db "Enter second integer: ",0
-    outmsg  db "Sum = ",0
-
-section .bss
-    ; no bss needed if we use stack
+    first_prompt  db "Enter first integer: ", 0
+    second_prompt db "Enter second integer: ", 0
+    result_text   db "Result = ", 0
 
 section .text
 asm_main:
     push ebp
-    mov ebp, esp
+    mov  ebp, esp
+    push ebx
 
-    ; prompt1
-    push prompt1
+    push dword first_prompt
     call print_string
-    add esp,4
-
-    ; read first integer -> returns value on stack? (standard asm_io.read_int usually puts result on stack)
-    call read_int           ; if read_int returns value on stack, check your asm_io. We'll assume it returns in eax
-    ; assume read_int puts result into eax
-    push eax                ; store first on stack
-
-    ; prompt2
-    push prompt2
-    call print_string
-    add esp,4
-
+    add  esp, 4
     call read_int
-    ; result in eax (second)
-    mov ebx, eax            ; second in ebx
+    mov  ebx, eax
 
-    ; pop first into ecx
-    pop ecx                 ; first value
-    add eax, ecx            ; eax = second + first
-
-    ; print output label
-    push outmsg
+    push dword second_prompt
     call print_string
-    add esp,4
+    add  esp, 4
+    call read_int
+    add  ebx, eax
 
-    ; print sum
-    push eax
+    push dword result_text
+    call print_string
+    add  esp, 4
+    push ebx
     call print_int
-    add esp,4
+    add  esp, 4
+    call print_nl
 
-    mov eax,0
+    pop  ebx
+    xor  eax, eax
     leave
     ret
+
+
+section .note.GNU-stack noalloc noexec nowrite progbits

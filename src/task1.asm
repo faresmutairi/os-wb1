@@ -1,44 +1,34 @@
-; task1.asm  (NASM, 32-bit)
-; Adds two globals and prints result using asm_io.print_int
-
 BITS 32
 global asm_main
-extern print_int
-extern print_string
-extern newline    ; if your asm_io provides newline; otherwise use print_string with "\n"
+%include "src/asm_io.inc"
 
 section .data
-    num1 dd  13
-    num2 dd   29
-    res  dd 0
-    msg  db "Result = ",0
+    first_number  dd 13
+    second_number dd 29
+    result        dd 0
+    result_text   db "The sum is: ", 0
 
 section .text
-
 asm_main:
-    push    ebp
-    mov     ebp, esp
+    push ebp
+    mov  ebp, esp
 
-    ; load numbers and add
-    mov     eax, [num1]
-    add     eax, [num2]
-    mov     [res], eax
+    mov  eax, [first_number]
+    add  eax, [second_number]
+    mov  [result], eax
 
-    ; print message (if asm_io.print_string exists)
-    push    msg
-    call    print_string
-    add     esp, 4
+    push dword result_text
+    call print_string
+    add  esp, 4
 
-    ; print result (print_int expects integer on stack)
-    push    dword [res]
-    call    print_int
-    add     esp, 4
+    push dword [result]
+    call print_int
+    add  esp, 4
+    call print_nl
 
-    ; newline - optional
-    ; push newline ; uncomment if you have newline symbol
-    ; call print_string
-    ; add esp,4
-
-    mov     eax, 0      ; return 0
+    xor  eax, eax
     leave
     ret
+
+
+section .note.GNU-stack noalloc noexec nowrite progbits

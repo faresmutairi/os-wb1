@@ -1,73 +1,128 @@
-#Worksheet  1 — An echo of Assembler
-Student: fares almutairi 
-Module: os
-Date: 4th December 2025
+# Worksheet 1 — An Echo of Assembler
 
-## Repo structure
-repo-name/
-README.md
-Makefile
-src/
-asm_io.inc
-asm_io.asm
-driver.c
-task1.asm
-task1_2.asm
-name_repeat.asm
-array_sum.asm
-range_sum.asm
+**Student:** Fares Almutairi  
+**Student ID:** 23072137  
+**Module:** Advanced Systems Programming (`UFCFWK-15-2`)  
+**Date:** 4 December 2025
 
+## Overview
 
-## How to build (on csctcloud)
-1. Clone the repo to `csctcloud.uwe.ac.uk` (use SSH token if needed).
-2. `cd` to repo root.
-3. Run `make` (this builds all targets).
-4. Run example program: `./src/task1`
+This repository contains the five 32-bit x86 assembly programs required for
+Worksheet 1. The programs are assembled with NASM and linked with a small C
+driver and the included `asm_io` implementation. The work was built and tested
+on `csctcloud.uwe.ac.uk`.
 
-## What I implemented
-- **Task 1 (20%)**: This program loads two global integers, adds them together using basic register operations, and prints the result using print_int.
-  - **Example output:**
- ``` The sum is: 42
-- **Task 1.2 (20%)**: `task1_2.asm` — This program reads two integers from the user using read_int, adds them together, and prints the result.
-- **Example output:**
-```Enter first number: 10
-Enter second number: 20
-Result = 30```
+## Repository structure
 
-- **Task 2 (20%)**:
-  - `name_repeat.asm` — This program asks the user for their name and for a repeat count.
-It validates that the number is between 50 and 100.
-If the number is valid, it prints Welcome, <name> the given number of times.
-Otherwise, it prints an error message.
-Enter your name: Fares
-Enter repetition count: 55
-Welcome, Fares
-...
-  - `array_sum.asm` — creates array 1..100, sums it, prints result.
-  The sum of numbers 1..100 is: 5050
-  - `range_sum.asm` — asks low & high indices, validates, sums that portion and prints.
-- **Task 3 (20%)**: `Makefile` that builds all executables and a `clean` target.
-- **Task 4 (40%)**: This README and screenshots and explanations. (Add screenshots showing the program running, and describe how it works.)
+```text
+.
+├── README.md
+├── Makefile
+├── .gitignore
+├── evidence/
+└── src/
+    ├── asm_io.asm
+    ├── asm_io.inc
+    ├── driver.c
+    ├── task1.asm
+    ├── task1_2.asm
+    ├── name_repeat.asm
+    ├── array_sum.asm
+    └── range_sum.asm
+```
 
-## Notes and assumptions
-- The code uses functions supplied in `asm_io.asm`/`asm_io.inc` provided on Blackboard (print_int, print_string, read_int, read_string).
-- Some small calling-convention details may differ depending on your version of `asm_io` (e.g., whether `read_int` returns value in `eax` or pushes on the stack). If you see different behavior, adjust accordingly.
+## Task implementation
 
-## How to run each program
-build just one program:
+| Program | Implementation | Expected result |
+|---|---|---|
+| `task1.asm` | Adds two global integers, 13 and 29 | `The sum is: 42` |
+| `task1_2.asm` | Reads two integers and prints their sum | `10 + 20 = 30` |
+| `name_repeat.asm` | Reads a name and validates `50 <= n <= 100` | Prints exactly `n` greetings |
+| `array_sum.asm` | Creates and sums the array `1..100` | `5050` |
+| `range_sum.asm` | Validates and sums an inclusive index range | Indices `10..20` give `165` |
 
-make task1
-./src/task1
+The assembly routines preserve the required callee-saved registers. Input
+bounds are checked before array access. Output is explicitly flushed before
+input is requested so prompts display correctly over SSH.
 
-or build all:
+## Build and run
 
+Requirements: NASM, GCC, GNU Make and 32-bit development libraries.
+
+```bash
+make clean
 make
+```
+
+Run the programs individually:
+
+```bash
+./src/task1
+./src/task1_2
 ./src/name_repeat
+./src/array_sum
+./src/range_sum
+```
 
+Run the repeatable test suite:
 
+```bash
+make test
+```
+
+Remove generated files before committing:
+
+```bash
+make clean
+```
+
+## Testing summary
+
+| Test | Input | Observed result | Status |
+|---|---|---|---|
+| Global sum | None | `42` | Pass |
+| Interactive sum | `10`, `20` | `30` | Pass |
+| Lower repetition boundary | `Fares`, `50` | 50 greetings | Pass |
+| Upper repetition boundary | `Fares`, `100` | 100 greetings | Pass |
+| Invalid low boundary | `Fares`, `49` | Rejected | Pass |
+| Invalid high boundary | `Fares`, `101` | Rejected | Pass |
+| Array sum | None | `5050` | Pass |
+| Inclusive range sum | `10`, `20` | `165` | Pass |
+
+## Evidence
+
+### Clean build and interactive addition
+
+![Clean build and task 1.2](evidence/01-clean-build-and-task1-2.png)
+
+### Array and range results
+
+![Array and range results](evidence/02-array-and-range-results.png)
+
+### Valid name repetition
+
+![Name repetition](evidence/03-name-repeat-valid.png)
+
+### Automated tests
+
+![Automated test suite](evidence/04-automated-tests.png)
+
+## Reflection
+
+The main technical challenge was maintaining the 32-bit cdecl calling
+convention while calling C library functions from assembly. Loop counters and
+array bounds must not be accidentally overwritten by function calls, so the
+programs preserve `EBX`, `ESI` and `EDI` where required. A clean build and the
+boundary tests demonstrate that the repository does not depend on stale object
+files and that invalid inputs are rejected before memory is accessed.
+
+## Submission details
+
+- **Repository URL:** Add after creating the GitHub/GitLab repository.
+- **Demonstration video URL:** Add after uploading the required face-and-screen recording.
+- **Collaboration and tool declaration:** Complete truthfully in accordance with the module's academic-conduct requirements before submission.
 
 ## References
-- PC Assembly Language (book)
-- Lecture slides: Learning Unit 2
 
-
+- Carter, P.A. (2019) *PC Assembly Language*.
+- Advanced Systems Programming lecture and worksheet material.

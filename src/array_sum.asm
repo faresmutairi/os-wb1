@@ -1,55 +1,53 @@
-; array_sum.asm
-; Creates array of 1..100, sums and prints result
 BITS 32
 global asm_main
-extern print_int
-extern print_string
+%include "src/asm_io.inc"
 
 section .data
-    msg db "Sum of 1..100 = ",0
+    result_text db "The sum of numbers 1..100 is: ", 0
 
 section .bss
-    arr resd 100    ; reserve 100 dwords
+    numbers resd 100
 
 section .text
 asm_main:
     push ebp
-    mov ebp, esp
+    mov  ebp, esp
+    push ebx
+    push esi
 
-    ; initialize array: arr[i] = i+1
-    mov ecx, 0
-.init_loop:
-    cmp ecx, 100
-    jge .init_done
-    mov eax, ecx
-    add eax, 1
-    mov [arr + ecx*4], eax
-    inc ecx
-    jmp .init_loop
-.init_done:
+    xor  ecx, ecx
+.fill_array:
+    cmp  ecx, 100
+    jge  .begin_sum
+    lea  eax, [ecx + 1]
+    mov  [numbers + ecx * 4], eax
+    inc  ecx
+    jmp  .fill_array
 
-    ; sum array
-    xor esi, esi    ; sum in esi (32-bit)
-    mov ecx, 0
-.sum_loop:
-    cmp ecx, 100
-    jge .sum_done
-    mov eax, [arr + ecx*4]
-    add esi, eax
-    inc ecx
-    jmp .sum_loop
-.sum_done:
+.begin_sum:
+    xor  ecx, ecx
+    xor  esi, esi
+.sum_array:
+    cmp  ecx, 100
+    jge  .show_result
+    add  esi, [numbers + ecx * 4]
+    inc  ecx
+    jmp  .sum_array
 
-    ; print message
-    push msg
+.show_result:
+    push dword result_text
     call print_string
-    add esp,4
-
-    ; print sum (in esi)
+    add  esp, 4
     push esi
     call print_int
-    add esp,4
+    add  esp, 4
+    call print_nl
 
-    mov eax, 0
+    pop  esi
+    pop  ebx
+    xor  eax, eax
     leave
     ret
+
+
+section .note.GNU-stack noalloc noexec nowrite progbits
